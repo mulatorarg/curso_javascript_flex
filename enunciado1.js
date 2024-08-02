@@ -53,21 +53,21 @@ Obesidad	≥30,00
 function showBMIResult(imc_calculado) {
 
     if (isNaN(imc_calculado)) {
-        alert("No se ha podido calcular correctamente el IMC del individuo. Intente de nuevo, presionando el botón.");
+        alert("No se ha podido calcular correctamente el IMC del individuo. Intente de nuevo, presionando el botón 'Calcular IMC'.");
         return;
     }
 
     let clasificacion = '😎';
-    const imc_porcentil = imc_calculado * 100;
+    const imc_percentil = imc_calculado * 100;
 
     switch (true) {
-        case (imc_porcentil <= 18.5):
+        case (imc_percentil <= 18.5):
             clasificacion = "⚠️ Peso bajo. Cuidate!"
             break;
-        case (imc_porcentil < 25):
+        case (imc_percentil < 25):
             clasificacion = "✅ Normal. No aflojes"
             break;
-        case (imc_porcentil < 30):
+        case (imc_percentil < 30):
             clasificacion = "⚠️ Sobrepeso. Cuidate!"
             break;
         default:
@@ -89,7 +89,7 @@ function getUserData() {
     console.log(masa);
     if (isNaN(masa) || masa <= 0) {
         console.error("getUserData", "La masa del individuo no tiene un valor correcto: " + masa);
-        alert("No ha ingresado un valor correcto para el peso del Individuo. Intente de nuevo, presionando el botón.");
+        alert("No ha ingresado un valor correcto para el peso del Individuo. Intente de nuevo, presionando el botón 'Calcular IMC'.");
         return null;
     }
 
@@ -98,7 +98,7 @@ function getUserData() {
     console.log(estatura);
     if (isNaN(estatura) || estatura <= 0) {
         console.error("getUserData", "La estatura del individuo no tiene un valor correcto: " + estatura);
-        alert("No ha ingresado un valor correcto para la estatura del Individuo. Intente de nuevo, presionando el botón.");
+        alert("No ha ingresado un valor correcto para la estatura del Individuo. Intente de nuevo, presionando el botón 'Calcular IMC'.");
         return null;
     }
 
