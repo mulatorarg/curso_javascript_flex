@@ -1,1 +1,6 @@
-console.log('Archivo Main Cargado!');
+import { cargarCategorias, cargarProductos, calcularTotales } from './funciones.js';
+
+cargarCategorias();
+cargarProductos();
+
+calcularTotales();
