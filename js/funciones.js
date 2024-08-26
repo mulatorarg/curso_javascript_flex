@@ -99,6 +99,9 @@ function cargarProductos() {
               <div class="card-title">${producto.nombre}</div>
               <div class="card-text">${producto.precio}</div>
             </div>
+            <div class="card-footer">
+              <button onclick="agregarProducto(${producto.id})" type="button" class="btn btn-sm btn-success">Agregar al carrito</button>
+            </div>
           </div>
         </div>`;
     });
@@ -149,11 +152,28 @@ function agregarProducto(id = 0, cantidad = 1) {
     };
   }
 
+  var nuevoProducto;
+  const agregar = false;
   carrito.items.forEach(item => {
-    if (item.id == id) return true;
+    if (item.producto == id) {
+      item.cantidad += cantidad;
+//      item.total
+    } else {
+      nuevoProducto = {
+        cantidad: cantidad,
+        producto: id,
+        descripcion: productos.find(),
+        imagen: "bebidas-quilmes-1l.jpg",
+        precio: 1000.00,
+        subtotal: 1000.00
+      }
+      agregar = true;
+    }
   });
 
-  return false;
+  if (agregar) carrito.items.push(nuevoProducto);
+
+  localStorage.setItem('carrito', JSON.stringify(carrito));
 }
 
 function comprobarCarrito() {
@@ -177,6 +197,7 @@ function comprobarCarrito() {
         </div>`;
     });
   }
+
   divCarrito.innerHTML = divCarritoTexto;
   divCarritoTotal.innerHTML = divCarritoTotalTexto;
 }
