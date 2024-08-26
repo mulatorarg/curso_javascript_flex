@@ -1,56 +1,96 @@
-import { carritoEjemplo, categorias, productos } from "./base_de_datos.js";
-
 const divProductos = document.getElementById("divProductos");
 const dropdownCategorias = document.getElementById("dropdownCategorias");
+
+const divCarrito = document.getElementById("divCarrito");
+const divCarritoTotal = document.getElementById("divCarritoTotal");
+
+const divCarritoVolver = document.getElementById("divCarritoVolver");
+const divCarritoVaciar = document.getElementById("divCarritoVaciar");
+const divCarritoRealizar = document.getElementById("divCarritoRealizar");
 
 const spanCantidad = document.getElementById("spanCantidad");
 
 const txtBuscarProducto = document.getElementById("txtBuscarProducto");
 const btnBuscarProducto = document.getElementById("btnBuscarProducto");
 const btnLimpiarProducto = document.getElementById("btnLimpiarProducto");
-var buscarProducto = localStorage.getItem('buscarProducto') ?? '';
+var buscarProducto = '';
+var productosFiltrados = [];
 var carrito = localStorage.getItem('carrito') ?? undefined;
 
-const pruebas = false;
-if (pruebas) carrito = carritoEjemplo;
+const pruebas = true;
+if (pruebas && carrito == undefined) {
+  carrito = carritoEjemplo;
+  localStorage.setItem('carrito', JSON.stringify(carrito));
+}
 
 // --------------------------------------------------------------------------------
-btnLimpiarProducto.addEventListener("click", () => {
-  localStorage.setItem(buscarProducto, '');
-  buscarProducto = texto;
-  txtBuscarProducto.value = texto;
+btnLimpiarProducto.addEventListener("click", (e) => {
+  buscarProducto = '';
+  txtBuscarProducto.value = '';
   cargarProductos();
 });
 
 // --------------------------------------------------------------------------------
-btnBuscarProducto.addEventListener("click", () => {
-  const texto = txtBuscarProducto.value;
-  localStorage.setItem(buscarProducto, texto);
-  buscarProducto = texto;
+btnBuscarProducto.addEventListener("click", (e) => {
+  buscarProducto = txtBuscarProducto.value;
   cargarProductos();
 });
 
 // --------------------------------------------------------------------------------
+divCarritoVaciar.addEventListener("click", (e) => {
+  console.log('divCarritoVaciar');
+  localStorage.removeItem('carrito');
+});
 
-export function cargarCategorias() {
+// --------------------------------------------------------------------------------
+divCarritoRealizar.addEventListener("click", (e) => {
+  console.log('divCarritoRealizar');
+});
+
+// --------------------------------------------------------------------------------
+
+function sinImplementar() {
+  Swal.fire({
+    title: "CoderShop JS",
+    text: "Función no implementada!",
+    icon: "info"
+  });
+  return true;
+}
+
+// --------------------------------------------------------------------------------
+
+function cargarCategorias() {
+  //console.log('Categorias', categorias.length);
   var contenido = '';
   categorias.forEach(categoria => {
-    contenido += `<li><a class="dropdown-item" href="#">${categoria.nombre}</a></li>`;
+    contenido += `<li><a class="dropdown-item" href="javascript:void(0)" onclick="sinImplementar();">${categoria.nombre}</a></li>`;
   });
   dropdownCategorias.innerHTML = contenido;
 }
 
 // --------------------------------------------------------------------------------
 
-export function cargarProductos() {
+function cargarProductos() {
   //console.log('Productos', productos.length);
-  divProductos.innerHTML = 'No se encontraron Productos.';
-  //console.log(buscarProducto);
+  divProductos.innerHTML = '<p>No se encontraron Productos.</p>';
+  buscarProducto = buscarProducto.toLowerCase();
 
   if (productos.length > 0) {
 
+    // si tengo algun texto que buscar, filtro
+    if (buscarProducto.length > 0) {
+      productosFiltrados = productos.filter((item) => item.nombre.toLowerCase().includes(buscarProducto));
+    } else {
+      // si NO tengo algun texto que buscar, muestro todos
+      productosFiltrados = productos;
+    }
+
+    // if no tengo productos que mostrar, vuelvo (ya tengo el msj arriba)
+    if (productosFiltrados.length == 0) return;
+
     var contenido = `<div class="row">`;
-    productos.forEach(producto => {
+    productosFiltrados.forEach(producto => {
       contenido += `
         <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
           <div class="card">
@@ -64,11 +104,13 @@ export function cargarProductos() {
     });
     divProductos.innerHTML = contenido;
   }
-
 }
 
-export function calcularTotales() {
-  if(carrito === undefined) return;
+function calcularTotales() {
+  carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
+  if (carrito === undefined) return;
+
+  // console.log('calcularTotales.Carrito', carrito);
 
   var cantidadProductos = carrito.items.length ?? 0;
   var total = 0;
@@ -79,13 +121,62 @@ export function calcularTotales() {
 
   spanCantidad.innerText = cantidadProductos;
 
+  localStorage.setItem('carrito', JSON.stringify(carrito));
+
+  //console.log('calcularTotales.Carrito', carrito);
 }
 
+function existeProducto(id) {
+  carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
+  if (carrito === undefined) return false;
+  if (carrito.items.length == 0) return false;
 
-function existeProducto() {
+  carrito.items.forEach(item => {
+    if (item.producto_id == id) return true;
+  });
 
+  return false;
 }
 
+function agregarProducto(id = 0, cantidad = 1) {
+  carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
 
+  if ((carrito === undefined) || (carrito.items.length == 0)) {
+    carrito = {
+      usuario: 0,
+      total: 0,
+      items: []
+    };
+  }
 
+  carrito.items.forEach(item => {
+    if (item.id == id) return true;
+  });
 
+  return false;
+}
+
+function comprobarCarrito() {
+  console.log('comprobarCarrito');
+  carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
+  var divCarritoTexto = '';
+  var divCarritoTotalTexto = '';
+
+  if ((carrito !== undefined) && (carrito.items.length > 0)) {
+    divCarritoTexto = `<div class="row">`;
+    carrito.items.forEach(item => {
+      divCarritoTexto += `
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <img class="img thumbnail rounded" src="./img/productos/${item.imagen}" alt="${item.descripcion}" height="56">
+          </div>
+          <div class="flex-grow-1 ms-3">
+            ${item.descripcion} <br/>
+            ${item.cantidad} unidades a ${item.precio} cada una.
+          </div>
+        </div>`;
+    });
+  }
+  divCarrito.innerHTML = divCarritoTexto;
+  divCarritoTotal.innerHTML = divCarritoTotalTexto;
+}

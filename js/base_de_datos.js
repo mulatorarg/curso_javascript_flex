@@ -1,4 +1,4 @@
-export const categorias = [
+const categorias = [
   {
     nombre: "Bebidas"
   },
@@ -10,7 +10,7 @@ export const categorias = [
   },
 ];
 
-export const productos = [
+const productos = [
   {
     id: 1,
     codigo: "7112233445511",
@@ -55,15 +55,16 @@ export const productos = [
 
 
 // ejemplo de carrito:
-
-export const carritoEjemplo =
+const carritoEjemplo =
   {
+    usuario: 0,
     total: 1000.00,
     items: [
       {
         cantidad: 1,
-        producto_id: 1,
-        producto: 'CERVEZA QUILMES 1L',
+        producto: 1,
+        descripcion: 'CERVEZA QUILMES 1L',
+        imagen: "bebidas-quilmes-1l.jpg",
         precio: 1000.00,
         subtotal: 1000.00
       }
