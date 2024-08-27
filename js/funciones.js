@@ -13,15 +13,18 @@ const spanCantidad = document.getElementById("spanCantidad");
 const txtBuscarProducto = document.getElementById("txtBuscarProducto");
 const btnBuscarProducto = document.getElementById("btnBuscarProducto");
 const btnLimpiarProducto = document.getElementById("btnLimpiarProducto");
+
 var buscarProducto = '';
 var productosFiltrados = [];
 var carrito = localStorage.getItem('carrito') ?? undefined;
 
-const pruebas = true;
+/*
+const pruebas = false;
 if (pruebas && carrito == undefined) {
   carrito = carritoEjemplo;
   localStorage.setItem('carrito', JSON.stringify(carrito));
 }
+*/
 
 // --------------------------------------------------------------------------------
 btnLimpiarProducto.addEventListener("click", (e) => {
@@ -55,7 +58,6 @@ function sinImplementar() {
     text: "Función no implementada!",
     icon: "info"
   });
-  return true;
 }
 
 // --------------------------------------------------------------------------------
@@ -141,9 +143,20 @@ function existeProducto(id) {
   return false;
 }
 
-function agregarProducto(id = 0, cantidad = 1) {
-  carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
+async function agregarProducto(id = 0, cantidad = 1) {
 
+  const producto = productos.find((producto) => producto.id == id);
+  if (producto == undefined) {
+    //console.log('Producto NO OK');
+    await Swal.fire({
+      title: "CoderShop JS",
+      text: "Producto no encontrado.",
+      icon: "error"
+    });
+    return;
+  }
+
+  carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
   if ((carrito === undefined) || (carrito.items.length == 0)) {
     carrito = {
       usuario: 0,
@@ -152,50 +165,60 @@ function agregarProducto(id = 0, cantidad = 1) {
     };
   }
 
-  var nuevoProducto;
-  const agregar = false;
+  var nuevoItem;
+  var agregar = true;
+
   carrito.items.forEach(item => {
     if (item.producto == id) {
+      agregar = false;
+      item.precio = producto.precio;
       item.cantidad += cantidad;
-//      item.total
-    } else {
-      nuevoProducto = {
-        cantidad: cantidad,
-        producto: id,
-        descripcion: productos.find(),
-        imagen: "bebidas-quilmes-1l.jpg",
-        precio: 1000.00,
-        subtotal: 1000.00
-      }
-      agregar = true;
+      item.subtotal = item.cantidad * producto.precio;
     }
   });
 
-  if (agregar) carrito.items.push(nuevoProducto);
+  if (agregar) {
+    nuevoItem = {
+      cantidad: cantidad,
+      producto: id,
+      descripcion: producto.nombre,
+      imagen: producto.imagen,
+      precio: producto.precio,
+      subtotal: cantidad * producto.precio
+    }
+    carrito.items.push(nuevoItem)
+  }
 
   localStorage.setItem('carrito', JSON.stringify(carrito));
+  comprobarCarrito();
 }
 
 function comprobarCarrito() {
-  console.log('comprobarCarrito');
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
+  //console.log('comprobarCarrito', carrito);
   var divCarritoTexto = '';
   var divCarritoTotalTexto = '';
+  var total = 0;
 
-  if ((carrito !== undefined) && (carrito.items.length > 0)) {
-    divCarritoTexto = `<div class="row">`;
+  if ((carrito == undefined) || (carrito.items.length == 0)) {
+    divCarritoTexto = `<p>Carrito Vacío</p>`;
+  } else {
     carrito.items.forEach(item => {
+      total += item.subtotal * item.cantidad;
       divCarritoTexto += `
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center mb-2">
           <div class="flex-shrink-0">
             <img class="img thumbnail rounded" src="./img/productos/${item.imagen}" alt="${item.descripcion}" height="56">
           </div>
           <div class="flex-grow-1 ms-3">
             ${item.descripcion} <br/>
-            ${item.cantidad} unidades a ${item.precio} cada una.
+            ${item.cantidad} unidades a $ ${total.toFixed(2)} cada una.
+            <button onclick="agregarProducto(${item.producto}, -1)" type="button" class="btn btn-sm btn-danger">-</button>
+            <button onclick="agregarProducto(${item.producto},  1)" type="button" class="btn btn-sm btn-success">+</button>
           </div>
         </div>`;
     });
+    if (total > 0) divCarritoTotalTexto = `<p>Total: $ ${total.toFixed(2)}</p>`;
   }
 
   divCarrito.innerHTML = divCarritoTexto;
