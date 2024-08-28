@@ -43,6 +43,7 @@ btnBuscarProducto.addEventListener("click", (e) => {
 divCarritoVaciar.addEventListener("click", (e) => {
   console.log('divCarritoVaciar');
   localStorage.removeItem('carrito');
+  spanCantidad.innerText = '';
 });
 
 // --------------------------------------------------------------------------------
@@ -199,12 +200,14 @@ function comprobarCarrito() {
   var divCarritoTexto = '';
   var divCarritoTotalTexto = '';
   var total = 0;
+  var cantidadProductos = '';
 
   if ((carrito == undefined) || (carrito.items.length == 0)) {
     divCarritoTexto = `<p>Carrito Vacío</p>`;
   } else {
     carrito.items.forEach(item => {
       total += item.subtotal * item.cantidad;
+      cantidadProductos = carrito.items.length;
       divCarritoTexto += `
         <div class="d-flex align-items-center mb-2">
           <div class="flex-shrink-0">
@@ -223,4 +226,5 @@ function comprobarCarrito() {
 
   divCarrito.innerHTML = divCarritoTexto;
   divCarritoTotal.innerHTML = divCarritoTotalTexto;
+  spanCantidad.innerText = cantidadProductos;
 }
