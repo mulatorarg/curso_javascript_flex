@@ -14,17 +14,12 @@ const txtBuscarProducto = document.getElementById("txtBuscarProducto");
 const btnBuscarProducto = document.getElementById("btnBuscarProducto");
 const btnLimpiarProducto = document.getElementById("btnLimpiarProducto");
 
+var categoriasLst = [];
+var productosLst = [];
+
 var buscarProducto = '';
 var productosFiltrados = [];
 var carrito = localStorage.getItem('carrito') ?? undefined;
-
-/*
-const pruebas = false;
-if (pruebas && carrito == undefined) {
-  carrito = carritoEjemplo;
-  localStorage.setItem('carrito', JSON.stringify(carrito));
-}
-*/
 
 // --------------------------------------------------------------------------------
 btnLimpiarProducto.addEventListener("click", (e) => {
@@ -41,52 +36,55 @@ btnBuscarProducto.addEventListener("click", (e) => {
 
 // --------------------------------------------------------------------------------
 divCarritoVaciar.addEventListener("click", (e) => {
-  console.log('divCarritoVaciar');
+  //console.log('divCarritoVaciar');
   localStorage.removeItem('carrito');
   spanCantidad.innerText = '';
 });
 
 // --------------------------------------------------------------------------------
 divCarritoRealizar.addEventListener("click", (e) => {
-  console.log('divCarritoRealizar');
+  //console.log('divCarritoRealizar');
+  carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
+  if (carrito === undefined) {
+    Swal.fire({ title: "Agusele JS", text: "No tienes productos en tu carrito", icon: "error" });
+    return;
+  };
+
+  localStorage.removeItem('carrito');
+  spanCantidad.innerText = '';
+
+  Swal.fire({ title: "Agusele JS", text: "¡Gracias por su compra!", icon: "success" });
 });
 
 // --------------------------------------------------------------------------------
-
 function sinImplementar() {
-  Swal.fire({
-    title: "CoderShop JS",
-    text: "Función no implementada!",
-    icon: "info"
-  });
+  Swal.fire({ title: "Agusele JS", text: "Función no implementada!", icon: "info" });
 }
 
 // --------------------------------------------------------------------------------
-
 function cargarCategorias() {
-  //console.log('Categorias', categorias.length);
+  //console.log('Categorias', categoriasLst.length);
   var contenido = '';
-  categorias.forEach(categoria => {
+  categoriasLst.forEach(categoria => {
     contenido += `<li><a class="dropdown-item" href="javascript:void(0)" onclick="sinImplementar();">${categoria.nombre}</a></li>`;
   });
   dropdownCategorias.innerHTML = contenido;
 }
 
 // --------------------------------------------------------------------------------
-
 function cargarProductos() {
-  //console.log('Productos', productos.length);
+  //console.log('Productos', productosLst.length);
   divProductos.innerHTML = '<p>No se encontraron Productos.</p>';
   buscarProducto = buscarProducto.toLowerCase();
 
-  if (productos.length > 0) {
+  if (productosLst.length > 0) {
 
     // si tengo algun texto que buscar, filtro
     if (buscarProducto.length > 0) {
-      productosFiltrados = productos.filter((item) => item.nombre.toLowerCase().includes(buscarProducto));
+      productosFiltrados = productosLst.filter((item) => item.nombre.toLowerCase().includes(buscarProducto));
     } else {
       // si NO tengo algun texto que buscar, muestro todos
-      productosFiltrados = productos;
+      productosFiltrados = productosLst;
     }
 
     // if no tengo productos que mostrar, vuelvo (ya tengo el msj arriba)
@@ -112,6 +110,7 @@ function cargarProductos() {
   }
 }
 
+// --------------------------------------------------------------------------------
 function calcularTotales() {
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
   if (carrito === undefined) return;
@@ -132,6 +131,7 @@ function calcularTotales() {
   //console.log('calcularTotales.Carrito', carrito);
 }
 
+// --------------------------------------------------------------------------------
 function existeProducto(id) {
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
   if (carrito === undefined) return false;
@@ -144,13 +144,13 @@ function existeProducto(id) {
   return false;
 }
 
-async function agregarProducto(id = 0, cantidad = 1) {
-
-  const producto = productos.find((producto) => producto.id == id);
+// --------------------------------------------------------------------------------
+function agregarProducto(id = 0, cantidad = 1) {
+  const producto = productosLst.find((producto) => producto.id == id);
   if (producto == undefined) {
     //console.log('Producto NO OK');
-    await Swal.fire({
-      title: "CoderShop JS",
+    Swal.fire({
+      title: "Agusele JS",
       text: "Producto no encontrado.",
       icon: "error"
     });
@@ -194,6 +194,7 @@ async function agregarProducto(id = 0, cantidad = 1) {
   comprobarCarrito();
 }
 
+// --------------------------------------------------------------------------------
 function comprobarCarrito() {
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
   //console.log('comprobarCarrito', carrito);
