@@ -39,6 +39,12 @@ divCarritoVaciar.addEventListener("click", (e) => {
   //console.log('divCarritoVaciar');
   localStorage.removeItem('carrito');
   spanCantidad.innerText = '';
+  carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
+  if (carrito === undefined) {
+    msjPersonalizado("No tienes productos en tu carrito", "info");
+    return;
+  };
+  msjExitoTop('¡Su carrito fue vaciado correctamente!');
 });
 
 // --------------------------------------------------------------------------------
@@ -46,25 +52,47 @@ divCarritoRealizar.addEventListener("click", (e) => {
   //console.log('divCarritoRealizar');
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
   if (carrito === undefined) {
-    Swal.fire({ title: "Agusele JS", text: "No tienes productos en tu carrito", icon: "error" });
+    msjPersonalizado("No tienes productos en tu carrito", "error");
     return;
   };
 
   localStorage.removeItem('carrito');
   spanCantidad.innerText = '';
 
-  Swal.fire({ title: "Agusele JS", text: "¡Gracias por su compra!", icon: "success" });
+  msjPersonalizado("¡Gracias por su compra!");
 });
 
 // --------------------------------------------------------------------------------
 function sinImplementar() {
-  Swal.fire({ title: "Agusele JS", text: "Función no implementada!", icon: "info" });
+  msjPersonalizado("Función no implementada!", "info");
+}
+
+function msjPersonalizado(texto = 'Genial!', icono = 'success', botonOk = "Aceptar", titulo = 'Agusele JS') {
+  Swal.fire({
+    title: titulo,
+    icon: icono,
+    text: texto,
+    toast: true,
+    confirmButtonText: botonOk
+  });
+}
+
+function msjExitoTop(texto = 'Genial!') {
+  Swal.fire({
+    position: "top-end",
+    icon: "success",
+    text: texto,
+    showConfirmButton: false,
+    timer: 1500,
+    toast: true,
+    confirmButtonText: "Aceptar"
+  });
 }
 
 // --------------------------------------------------------------------------------
 function cargarCategorias() {
   //console.log('Categorias', categoriasLst.length);
-  var contenido = '';
+  let contenido = '';
   categoriasLst.forEach(categoria => {
     contenido += `<li><a class="dropdown-item" href="javascript:void(0)" onclick="sinImplementar();">${categoria.nombre}</a></li>`;
   });
@@ -90,7 +118,7 @@ function cargarProductos() {
     // if no tengo productos que mostrar, vuelvo (ya tengo el msj arriba)
     if (productosFiltrados.length == 0) return;
 
-    var contenido = `<div class="row">`;
+    let contenido = `<div class="row">`;
     productosFiltrados.forEach(producto => {
       contenido += `
         <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
@@ -117,8 +145,8 @@ function calcularTotales() {
 
   // console.log('calcularTotales.Carrito', carrito);
 
-  var cantidadProductos = carrito.items.length ?? 0;
-  var total = 0;
+  let cantidadProductos = carrito.items.length ?? 0;
+  let total = 0;
 
   carrito.items.forEach(item => {
     total += item.subtotal ?? 0;
@@ -146,14 +174,14 @@ function existeProducto(id) {
 
 // --------------------------------------------------------------------------------
 function agregarProducto(id = 0, cantidad = 1) {
+  if (isNaN(cantidad)) {
+    msjPersonalizado("No se pasó correctamenta la cantidad.", "error");
+  }
+
   const producto = productosLst.find((producto) => producto.id == id);
   if (producto == undefined) {
     //console.log('Producto NO OK');
-    Swal.fire({
-      title: "Agusele JS",
-      text: "Producto no encontrado.",
-      icon: "error"
-    });
+    msjPersonalizado("Producto no encontrado.", "error");
     return;
   }
 
@@ -166,15 +194,20 @@ function agregarProducto(id = 0, cantidad = 1) {
     };
   }
 
-  var nuevoItem;
-  var agregar = true;
+  let nuevoItem;
+  let agregar = true;
+  let positivo = (cantidad > 0);
 
-  carrito.items.forEach(item => {
+  carrito.items.forEach((item, index) => {
     if (item.producto == id) {
       agregar = false;
       item.precio = producto.precio;
       item.cantidad += cantidad;
       item.subtotal = item.cantidad * producto.precio;
+
+      if (item.cantidad <= 0) {
+        carrito.items.splice(index, 1);
+      }
     }
   });
 
@@ -192,16 +225,23 @@ function agregarProducto(id = 0, cantidad = 1) {
 
   localStorage.setItem('carrito', JSON.stringify(carrito));
   comprobarCarrito();
+
+  if (positivo) {
+    msj = "El producto fue sumado a tu carrito!";
+  } else {
+    msj = "El producto fue descontado de tu carrito!";
+  }
+  msjExitoTop(msj);
 }
 
 // --------------------------------------------------------------------------------
 function comprobarCarrito() {
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
   //console.log('comprobarCarrito', carrito);
-  var divCarritoTexto = '';
-  var divCarritoTotalTexto = '';
-  var total = 0;
-  var cantidadProductos = '';
+  let divCarritoTexto = '';
+  let divCarritoTotalTexto = '';
+  let total = 0;
+  let cantidadProductos = '';
 
   if ((carrito == undefined) || (carrito.items.length == 0)) {
     divCarritoTexto = `<p>Carrito Vacío</p>`;
