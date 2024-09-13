@@ -28,15 +28,12 @@ btnLimpiarProducto.addEventListener("click", (e) => {
   cargarProductos();
 });
 
-// --------------------------------------------------------------------------------
 btnBuscarProducto.addEventListener("click", (e) => {
   buscarProducto = txtBuscarProducto.value;
   cargarProductos();
 });
 
-// --------------------------------------------------------------------------------
 divCarritoVaciar.addEventListener("click", (e) => {
-  //console.log('divCarritoVaciar');
   localStorage.removeItem('carrito');
   spanCantidad.innerText = '';
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
@@ -47,9 +44,7 @@ divCarritoVaciar.addEventListener("click", (e) => {
   msjExitoTop('¡Su carrito fue vaciado correctamente!');
 });
 
-// --------------------------------------------------------------------------------
 divCarritoRealizar.addEventListener("click", (e) => {
-  //console.log('divCarritoRealizar');
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
   if (carrito === undefined) {
     msjPersonalizado("No tienes productos en tu carrito", "error");
@@ -77,8 +72,8 @@ function msjPersonalizado(texto = 'Genial!', icono = 'success', botonOk = "Acept
   });
 }
 
-function msjExitoTop(texto = 'Genial!') {
-  Swal.fire({
+async function msjExitoTop(texto = 'Genial!') {
+  await Swal.fire({
     position: "top-end",
     icon: "success",
     text: texto,
@@ -89,9 +84,20 @@ function msjExitoTop(texto = 'Genial!') {
   });
 }
 
+async function leerCategorias() {
+  const categoriasResp = await fetch('./data/categorias.json');
+  const categoriasJson = await categoriasResp.json();
+  categoriasLst = categoriasJson;
+}
+
+async function leerProductos() {
+  const productosResp = await fetch('./data/productos.json');
+  const productosJson = await productosResp.json();
+  productosLst = productosJson;
+}
+
 // --------------------------------------------------------------------------------
 function cargarCategorias() {
-  //console.log('Categorias', categoriasLst.length);
   let contenido = '';
   categoriasLst.forEach(categoria => {
     contenido += `<li><a class="dropdown-item" href="javascript:void(0)" onclick="sinImplementar();">${categoria.nombre}</a></li>`;
@@ -99,23 +105,18 @@ function cargarCategorias() {
   dropdownCategorias.innerHTML = contenido;
 }
 
-// --------------------------------------------------------------------------------
 function cargarProductos() {
-  //console.log('Productos', productosLst.length);
   divProductos.innerHTML = '<p>No se encontraron Productos.</p>';
   buscarProducto = buscarProducto.toLowerCase();
 
   if (productosLst.length > 0) {
 
-    // si tengo algun texto que buscar, filtro
     if (buscarProducto.length > 0) {
       productosFiltrados = productosLst.filter((item) => item.nombre.toLowerCase().includes(buscarProducto));
     } else {
-      // si NO tengo algun texto que buscar, muestro todos
       productosFiltrados = productosLst;
     }
 
-    // if no tengo productos que mostrar, vuelvo (ya tengo el msj arriba)
     if (productosFiltrados.length == 0) return;
 
     let contenido = `<div class="row">`;
@@ -138,12 +139,9 @@ function cargarProductos() {
   }
 }
 
-// --------------------------------------------------------------------------------
 function calcularTotales() {
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
   if (carrito === undefined) return;
-
-  // console.log('calcularTotales.Carrito', carrito);
 
   let cantidadProductos = carrito.items.length ?? 0;
   let total = 0;
@@ -155,11 +153,8 @@ function calcularTotales() {
   spanCantidad.innerText = cantidadProductos;
 
   localStorage.setItem('carrito', JSON.stringify(carrito));
-
-  //console.log('calcularTotales.Carrito', carrito);
 }
 
-// --------------------------------------------------------------------------------
 function existeProducto(id) {
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
   if (carrito === undefined) return false;
@@ -172,15 +167,13 @@ function existeProducto(id) {
   return false;
 }
 
-// --------------------------------------------------------------------------------
-function agregarProducto(id = 0, cantidad = 1) {
+async function agregarProducto(id = 0, cantidad = 1) {
   if (isNaN(cantidad)) {
     msjPersonalizado("No se pasó correctamenta la cantidad.", "error");
   }
 
   const producto = productosLst.find((producto) => producto.id == id);
   if (producto == undefined) {
-    //console.log('Producto NO OK');
     msjPersonalizado("Producto no encontrado.", "error");
     return;
   }
@@ -231,13 +224,11 @@ function agregarProducto(id = 0, cantidad = 1) {
   } else {
     msj = "El producto fue descontado de tu carrito!";
   }
-  msjExitoTop(msj);
+  await msjExitoTop(msj);
 }
 
-// --------------------------------------------------------------------------------
 function comprobarCarrito() {
   carrito = JSON.parse(localStorage.getItem('carrito')) ?? undefined;
-  //console.log('comprobarCarrito', carrito);
   let divCarritoTexto = '';
   let divCarritoTotalTexto = '';
   let total = 0;
