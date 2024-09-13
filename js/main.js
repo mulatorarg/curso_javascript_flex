@@ -1,10 +1,23 @@
-const categoriasJson = await fetch('./data/categorias.json');
-categoriasLst = await categoriasJson.json();
 
-const productosJson = await fetch('./data/productos.json');
-productosLst = await productosJson.json();
+async function leerCategorias() {
+  const categoriasJson = await fetch('./data/categorias.json');
+  categoriasLst = await categoriasJson.json();
+}
 
-cargarCategorias();
-cargarProductos();
+async function leerProductos() {
+  const productosJson = await fetch('./data/productos.json');
+  productosLst = await productosJson.json();
+}
 
-comprobarCarrito();
+leerCategorias();
+leerProductos();
+
+setTimeout(() => {
+
+  cargarCategorias();
+  cargarProductos();
+
+  comprobarCarrito();
+
+}, 2000);
+
